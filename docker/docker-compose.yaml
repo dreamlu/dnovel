@@ -1,0 +1,29 @@
+# docker-compose
+# author: dreamlu
+# github.com/dreamlu
+version: '3'
+services:
+  # redis
+  redis:
+    image: redis:5.0
+    ports:
+      - 6378:6379
+    container_name: d-redis
+    restart: always
+    networks:
+      - demo
+  # api gateway
+  demo:
+    image: registry.cn-hangzhou.aliyuncs.com/dreamlu/common:dnovel
+    ports:
+      - 8022:8022
+    container_name: d-demo
+    restart: always
+    volumes:
+      - /root/dnovel/bak/static:/static
+    networks:
+      - demo
+
+networks:
+  demo:
+    driver: bridge

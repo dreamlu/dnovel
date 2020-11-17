@@ -1,0 +1,44 @@
+package controllers
+
+import (
+	"dnovel/services"
+	"github.com/dreamlu/gt/tool/result"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+type IndexController struct {
+	Service services.BookService
+}
+
+func (c IndexController) GetSearch(u *gin.Context) {
+	k := u.Request.FormValue("k")
+	results := c.Service.GetListByKeyword(k)
+
+	u.JSON(http.StatusOK, result.GetSuccess(results))
+}
+
+func (c IndexController) GetInfo(u *gin.Context) {
+	detailURL := u.Request.FormValue("detail_url")
+	source := u.Request.FormValue("source")
+	info := c.Service.GetInfo(detailURL, source)
+
+	u.JSON(http.StatusOK, result.GetSuccess(info))
+}
+
+func (c IndexController) GetChapters(u *gin.Context) {
+	detailURL := u.Request.FormValue("detail_url")
+	source := u.Request.FormValue("source")
+	chapterList := c.Service.GetChapterList(detailURL, source)
+
+	u.JSON(http.StatusOK, result.GetSuccess(chapterList))
+}
+
+func (c IndexController) GetRead(u *gin.Context) {
+	detailURL := u.Request.FormValue("detail_url")
+	chapterURL := u.Request.FormValue("chapter_url")
+	source := u.Request.FormValue("source")
+	content := c.Service.GetContent(detailURL, chapterURL, source)
+
+	u.JSON(http.StatusOK, result.GetSuccess(content))
+}

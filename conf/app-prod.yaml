@@ -1,0 +1,14 @@
+app:
+  # database
+  db:
+    host: tcp(mysql:3306)
+    password: dreamlu
+    user: root
+  # redis
+  redis:
+    dB: 0
+    addr: redis:6379
+    poolSize: 0
+    minIdleConns: 0
+    #password:
+  notifyUrl: https://your domain/api/v1/wx/notify

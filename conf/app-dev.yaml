@@ -1,0 +1,16 @@
+app:
+  # database
+  db:
+    host: tcp(127.0.0.1:3306)
+    user: root
+    password: lucheng
+    log: true
+  # redis
+  redis:
+    dB: 0
+    addr: 127.0.0.1:6379
+    poolSize: 0
+    minIdleConns: 0
+    #password:
+  # 本地内网穿透测试域名
+  notifyUrl: http://test.deercoder.com/api/v1/wx/notify
