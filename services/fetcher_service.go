@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
+	"strings"
 )
 
 type FetcherService interface {
@@ -30,6 +31,7 @@ var (
 
 type fetcherService struct{}
 
+// 关键字搜索
 func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.BookInfo) {
 	bookSources := sourceService.GetAllSource()
 
@@ -131,6 +133,18 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 		Cover:       ele.ChildAttr(source.DetailBookCoverRule, "src"),
 		Category:    ele.ChildText(source.DetailBookCategoryRule),
 		Description: ele.ChildHtml(source.DetailBookDescriptionRule),
+		NewChapter:  ele.ChildText(source.DetailBookNewChapterRule),
+		URL:         ele.ChildAttr(source.DetailBookNewChapterUrlRule, "href"),
+		Source:      source.SourceKey,
+	}
+	// 这里应该用爬虫自动处理才对,没找到方法~呜呜~
+	if !strings.Contains(info.URL, "http") {
+		url := doc.Request.URL
+		if !strings.Contains(info.URL, "/") {
+			info.URL = url.String() + info.URL
+		} else {
+			info.URL = url.Scheme + "://" + url.Host + info.URL
+		}
 	}
 	return
 }

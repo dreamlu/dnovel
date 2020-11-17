@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// 提取器
 func NewFetcher() *colly.Collector {
 	c := colly.NewCollector()
 	extensions.Referer(c)
