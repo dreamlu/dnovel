@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
-	"strings"
 )
 
 type FetcherService interface {
@@ -73,27 +72,27 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 		return
 	}
 
-	var chapterListURL string
+	//var chapterListURL string
 	f := fetcher.NewFetcher()
 
-	if source.DetailChapterListURLRule != "" {
-		f.OnXML(source.DetailChapterURLRule, func(e *colly.XMLElement) {
-			var ele = fetcher.NewXMLElement(e)
-			chapterListURL = ele.ChildUrl(source.DetailChapterListURLRule, "href")
-			fc := fetcher.NewFetcher()
-			fc.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
-				chapterList = append(chapterList, s.parseChapterList(&source, e, chapterListURL))
-				return
-			})
-			fc.Visit(chapterListURL)
-			return
-		})
-	} else {
-		f.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
-			chapterList = append(chapterList, s.parseChapterList(&source, e, url))
-			return
-		})
-	}
+	//if source.DetailChapterListURLRule != "" {
+	//	f.OnXML(source.DetailChapterURLRule, func(e *colly.XMLElement) {
+	//		var ele = fetcher.NewXMLElement(e)
+	//		chapterListURL = ele.ChildUrl(source.DetailChapterListURLRule, "href")
+	//		fc := fetcher.NewFetcher()
+	//		fc.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
+	//			chapterList = append(chapterList, s.parseChapterList(&source, e, chapterListURL))
+	//			return
+	//		})
+	//		fc.Visit(chapterListURL)
+	//		return
+	//	})
+	//} else {
+	f.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
+		chapterList = append(chapterList, s.parseChapterList(&source, e, url))
+		return
+	})
+	//}
 	f.Visit(url)
 	return
 }
@@ -134,18 +133,18 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 		Category:    ele.ChildText(source.DetailBookCategoryRule),
 		Description: ele.ChildHtml(source.DetailBookDescriptionRule),
 		NewChapter:  ele.ChildText(source.DetailBookNewChapterRule),
-		URL:         ele.ChildAttr(source.DetailBookNewChapterUrlRule, "href"),
+		URL:         ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
 		Source:      source.SourceKey,
 	}
-	// 这里应该用爬虫自动处理才对,没找到方法~呜呜~
-	if !strings.Contains(info.URL, "http") {
-		url := doc.Request.URL
-		if !strings.Contains(info.URL, "/") {
-			info.URL = url.String() + info.URL
-		} else {
-			info.URL = url.Scheme + "://" + url.Host + info.URL
-		}
-	}
+	// 这里应该用爬虫自动处理才对,没找到方法~呜呜~,(找到了啦啦啦~ChildUrl)
+	//if !strings.Contains(info.URL, "http") {
+	//	url := doc.Request.URL
+	//	if !strings.Contains(info.URL, "/") {
+	//		info.URL = url.String() + info.URL
+	//	} else {
+	//		info.URL = url.Scheme + "://" + url.Host + info.URL
+	//	}
+	//}
 	return
 }
 

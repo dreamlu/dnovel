@@ -2,13 +2,14 @@ package fetcher
 
 import (
 	"github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/debug"
 	"github.com/gocolly/colly/v2/extensions"
 	"log"
 )
 
 // 提取器
 func NewFetcher() *colly.Collector {
-	c := colly.NewCollector()
+	c := colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
 	extensions.Referer(c)
 	extensions.RandomUserAgent(c)
 
