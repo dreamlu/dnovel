@@ -60,6 +60,8 @@ func SetRouter() *gin.Engine {
 		v.Static("static", "static")
 		// v.GET("/statics/file", file.StaticFile)
 		inc := controllers.IndexController{Service: services.NewBookService()}
+		v.GET("/classify", inc.GetClassify)
+		v.GET("/classify/info", inc.GetClassifyInfo)
 		v.GET("/search", inc.GetSearch)
 		v.GET("/info", inc.GetInfo)
 		v.GET("/chapters", inc.GetChapters)

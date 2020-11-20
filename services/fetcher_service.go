@@ -9,15 +9,11 @@ import (
 )
 
 type FetcherService interface {
-	GetItemList(keyword string) []*datamodels.BookInfo
-	GetItem(url string, key string) datamodels.BookInfo
-	GetChapterList(url string, key string) []datamodels.Chapter
-	GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent)
-
-	parseItemSearch(source *datamodels.BookSource, doc *colly.XMLElement) *datamodels.BookInfo
-	parseItemInfo(source *datamodels.BookSource, doc *colly.XMLElement) datamodels.BookInfo
-	parseChapterList(source *datamodels.BookSource, doc *colly.XMLElement, url string) datamodels.Chapter
-	parseContent(source *datamodels.BookSource, doc *colly.XMLElement, url string) datamodels.BookContent
+	GetClassifyInfo(classify string) []*datamodels.BookInfo                                      // 分类书籍查找
+	GetItemList(keyword string) []*datamodels.BookInfo                                           // 关键字查找
+	GetItem(url string, key string) datamodels.BookInfo                                          // 书籍详情
+	GetChapterList(url string, key string) []datamodels.Chapter                                  // 章节列表
+	GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
 }
 
 func NewFetcherService() FetcherService {
@@ -30,6 +26,29 @@ var (
 
 type fetcherService struct{}
 
+// 分类书籍查找
+func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodels.BookInfo) {
+	bookSources := sourceService.GetAllSource()
+
+	for i := range bookSources {
+		source := &bookSources[i]
+
+		for _, url := range source.ClassifyUrl[classify] {
+			f := fetcher.NewFetcher()
+			q, _ := queue.New(
+				7, // Number of consumer threads
+				&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
+			)
+			f.OnXML(source.ClassifyItemRule, func(e *colly.XMLElement) {
+				itemList = append(itemList, s.parseClassifyInfo(source, e))
+			})
+			q.AddURL(url)
+			q.Run(f)
+		}
+	}
+	return
+}
+
 // 关键字搜索
 func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.BookInfo) {
 	bookSources := sourceService.GetAllSource()
@@ -38,7 +57,7 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 		source := &bookSources[i]
 		f := fetcher.NewFetcher()
 		q, _ := queue.New(
-			2, // Number of consumer threads
+			7, // Number of consumer threads
 			&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 		)
 
@@ -108,6 +127,17 @@ func (s *fetcherService) GetContent(detailURL string, chapterURL string, key str
 		content = s.parseContent(&source, e, detailURL)
 	})
 	f.Visit(chapterURL)
+	return
+}
+
+func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
+	var ele = fetcher.NewXMLElement(doc)
+	item = &datamodels.BookInfo{
+		Name:   ele.ChildText(source.ClassifyItemName),
+		Author: ele.ChildText(source.ClassifyItemAuthor),
+		URL:    ele.ChildUrl(source.ClassifyItemUrl, "href"),
+		Source: source.SourceKey,
+	}
 	return
 }
 

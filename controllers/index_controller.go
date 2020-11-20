@@ -11,10 +11,21 @@ type IndexController struct {
 	Service services.BookService
 }
 
+func (c IndexController) GetClassify(u *gin.Context) {
+	results := c.Service.GetClassify()
+
+	u.JSON(http.StatusOK, result.GetSuccess(results))
+}
+
+func (c IndexController) GetClassifyInfo(u *gin.Context) {
+	classify := u.Request.FormValue("name")
+	results := c.Service.GetClassifyInfo(classify)
+	u.JSON(http.StatusOK, result.GetSuccess(results))
+}
+
 func (c IndexController) GetSearch(u *gin.Context) {
 	k := u.Request.FormValue("k")
 	results := c.Service.GetListByKeyword(k)
-
 	u.JSON(http.StatusOK, result.GetSuccess(results))
 }
 
