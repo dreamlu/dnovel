@@ -57,3 +57,20 @@ func (h *XMLElement) ChildUrl(xpathQuery string, attrName string) string {
 		return uri.String()
 	}
 }
+
+func (h *XMLElement) ChildUrlText(xpathQuery string) string {
+	if xpathQuery == "" {
+		return ""
+	}
+	href := h.ChildText(xpathQuery)
+	uri, err := url.Parse(href)
+	if href == "" || err != nil {
+		return ""
+	}
+	baseUri, _ := url.Parse(h.Request.URL.String())
+	if !uri.IsAbs() {
+		return baseUri.ResolveReference(uri).String()
+	} else {
+		return uri.String()
+	}
+}
