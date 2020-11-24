@@ -4,9 +4,9 @@ dnovel 是一个简洁，干净的小说聚合系统
 
 ## 概述
 
-[后端地址](https://github.com/dreamlu/donovel)
+[后端地址](https://github.com/dreamlu/dnovel)
 
-[前端flutter地址](https://github.com/dreamlu/donovel-flutter)
+[前端flutter地址](https://github.com/dreamlu/dnovel-flutter)
 
 默认端口为 8022  
 

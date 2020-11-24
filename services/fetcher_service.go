@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
+	"strings"
 )
 
 type FetcherService interface {
@@ -151,6 +152,9 @@ func (s *fetcherService) parseItemSearch(source *datamodels.BookSource, doc *col
 		URL:        ele.ChildUrl(source.SearchItemURLRule, "href"),
 		Source:     source.SourceKey,
 	}
+	if strings.Contains(item.Author, "：") {
+		item.Author = strings.Split(item.Author, "：")[1]
+	}
 	return
 }
 
@@ -159,22 +163,16 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 	info = datamodels.BookInfo{
 		Name:        ele.ChildText(source.DetailBookNameRule),
 		Author:      ele.ChildText(source.DetailBookAuthorRule),
-		Cover:       ele.ChildAttr(source.DetailBookCoverRule, "src"),
+		Cover:       ele.ChildUrlText(source.DetailBookCoverRule),
 		Category:    ele.ChildText(source.DetailBookCategoryRule),
 		Description: ele.ChildHtml(source.DetailBookDescriptionRule),
 		NewChapter:  ele.ChildText(source.DetailBookNewChapterRule),
 		URL:         ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
 		Source:      source.SourceKey,
 	}
-	// 这里应该用爬虫自动处理才对,没找到方法~呜呜~,(找到了啦啦啦~ChildUrl)
-	//if !strings.Contains(info.URL, "http") {
-	//	url := doc.Request.URL
-	//	if !strings.Contains(info.URL, "/") {
-	//		info.URL = url.String() + info.URL
-	//	} else {
-	//		info.URL = url.Scheme + "://" + url.Host + info.URL
-	//	}
-	//}
+	if strings.Contains(info.Author, "：") {
+		info.Author = strings.Split(info.Author, "：")[1]
+	}
 	return
 }
 
