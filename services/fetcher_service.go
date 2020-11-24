@@ -37,7 +37,7 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 		for _, url := range source.ClassifyUrl[classify] {
 			f := fetcher.NewFetcher()
 			q, _ := queue.New(
-				7, // Number of consumer threads
+				10, // Number of consumer threads
 				&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 			)
 			f.OnXML(source.ClassifyItemRule, func(e *colly.XMLElement) {
@@ -58,7 +58,7 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 		source := &bookSources[i]
 		f := fetcher.NewFetcher()
 		q, _ := queue.New(
-			7, // Number of consumer threads
+			10, // Number of consumer threads
 			&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 		)
 
@@ -92,27 +92,12 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 		return
 	}
 
-	//var chapterListURL string
 	f := fetcher.NewFetcher()
 
-	//if source.DetailChapterListURLRule != "" {
-	//	f.OnXML(source.DetailChapterURLRule, func(e *colly.XMLElement) {
-	//		var ele = fetcher.NewXMLElement(e)
-	//		chapterListURL = ele.ChildUrl(source.DetailChapterListURLRule, "href")
-	//		fc := fetcher.NewFetcher()
-	//		fc.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
-	//			chapterList = append(chapterList, s.parseChapterList(&source, e, chapterListURL))
-	//			return
-	//		})
-	//		fc.Visit(chapterListURL)
-	//		return
-	//	})
-	//} else {
 	f.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
 		chapterList = append(chapterList, s.parseChapterList(&source, e, url))
 		return
 	})
-	//}
 	f.Visit(url)
 	return
 }

@@ -8,9 +8,18 @@ dnovel 是一个简洁，干净的小说聚合系统
 
 [前端flutter地址](https://github.com/dreamlu/dnovel-flutter)
 
-默认端口为 8022  
+长期维护,学习colly自用  
 
-docker部署：进入docker目录,执行update.sh即可  
+### 界面  
+![界面](static/img/dnovel_flutter.jpeg)
+
+### 部署  
+- docker部署  
+进入docker目录,执行update.sh即可  
+- 源码  
+go build  
+
+默认端口为 8022 
 
 ## TODO
 - 智能推荐  
@@ -20,7 +29,7 @@ docker部署：进入docker目录,执行update.sh即可
 - [x] 聚合搜索
 - [x] 书籍详情
 - [x] 内容阅读
-- [ ] 首页分类推荐
+- [ ] 首页推荐
 
 ### 优化
 - 首屏加载过慢
