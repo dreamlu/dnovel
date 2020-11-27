@@ -110,7 +110,7 @@ func (s *fetcherService) GetContent(detailURL string, chapterURL string, key str
 
 	f := fetcher.NewFetcher()
 	f.OnXML("//body", func(e *colly.XMLElement) {
-		content = s.parseContent(&source, e, detailURL)
+		content = s.parseContent(&source, e, chapterURL)
 	})
 	f.Visit(chapterURL)
 	return
@@ -143,6 +143,10 @@ func (s *fetcherService) parseItemSearch(source *datamodels.BookSource, doc *col
 	return
 }
 
+var (
+	auts = []string{":", "："}
+)
+
 func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly.XMLElement) (info datamodels.BookInfo) {
 	var ele = fetcher.NewXMLElement(doc)
 	info = datamodels.BookInfo{
@@ -155,8 +159,10 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 		URL:         ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
 		Source:      source.SourceKey,
 	}
-	if strings.Contains(info.Author, "：") {
-		info.Author = strings.Split(info.Author, "：")[1]
+	for _, v := range auts {
+		if strings.Contains(info.Author, v) {
+			info.Author = strings.Split(info.Author, v)[1]
+		}
 	}
 	return
 }
@@ -178,7 +184,7 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 	content = datamodels.BookContent{
 		Title:       ele.ChildText(source.ContentTitleRule),
 		Text:        ele.ChildHtml(source.ContentTextRule),
-		DetailURL:   url,
+		CurrentURL:  url,
 		PreviousURL: ele.ChildUrl(source.ContentPreviousURLRule, "href"),
 		NextURL:     ele.ChildUrl(source.ContentNextURLRule, "href"),
 		Source:      source.SourceKey,
