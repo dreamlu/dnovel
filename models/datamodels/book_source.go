@@ -28,6 +28,8 @@ type BookSource struct {
 	DetailBookDescriptionRule   string `json:"detail_book_description_rule" comment:"小说描述规则"`
 	DetailBookNewChapterRule    string `json:"detail_book_new_chapter_rule" comment:"小说最新章节规则"`
 	DetailBookNewChapterUrlRule string `json:"detail_book_new_chapter_url_rule" comment:"小说最新章节url规则"`
+	DetailBookFirstChapterRule  string `json:"detail_book_first_chapter_rule"` // 第一章规则
+	DetailBookFirstUrlRule      string `json:"detail_book_first_url_rule"`     // 第一章url规则
 
 	DetailChapterRule      string `json:"detail_chapter_list_rule" comment:"小说章节列表规则"`
 	DetailChapterTitleRule string `json:"detail_chapter_title_rule" comment:"小说章节名称规则"`

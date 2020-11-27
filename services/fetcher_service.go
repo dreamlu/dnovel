@@ -150,14 +150,16 @@ var (
 func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly.XMLElement) (info datamodels.BookInfo) {
 	var ele = fetcher.NewXMLElement(doc)
 	info = datamodels.BookInfo{
-		Name:        ele.ChildText(source.DetailBookNameRule),
-		Author:      ele.ChildText(source.DetailBookAuthorRule),
-		Cover:       ele.ChildUrlText(source.DetailBookCoverRule),
-		Category:    ele.ChildText(source.DetailBookCategoryRule),
-		Description: ele.ChildHtml(source.DetailBookDescriptionRule),
-		NewChapter:  ele.ChildText(source.DetailBookNewChapterRule),
-		URL:         ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
-		Source:      source.SourceKey,
+		Name:         ele.ChildText(source.DetailBookNameRule),
+		Author:       ele.ChildText(source.DetailBookAuthorRule),
+		Cover:        ele.ChildUrlText(source.DetailBookCoverRule),
+		Category:     ele.ChildText(source.DetailBookCategoryRule),
+		Description:  ele.ChildHtml(source.DetailBookDescriptionRule),
+		NewChapter:   ele.ChildText(source.DetailBookNewChapterRule),
+		URL:          ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
+		FirstChapter: ele.ChildText(source.DetailBookFirstChapterRule),
+		FirstURL:     ele.ChildUrl(source.DetailBookFirstUrlRule, "href"),
+		Source:       source.SourceKey,
 	}
 	for _, v := range auts {
 		if strings.Contains(info.Author, v) {

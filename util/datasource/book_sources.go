@@ -32,7 +32,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		SearchItemNewChapterRule: `./span[@class="s3"]/a`,
 		SearchItemURLRule:        `./span[@class="s2"]/a`,
 
-		DetailBookItemRule:          `//div[@class="box_con"][1]`,
+		DetailBookItemRule:          `//div[@id="main"]`,
 		DetailBookNameRule:          `//div[@id="info"]/h1`,
 		DetailBookAuthorRule:        `//div[@id="info"]/p[1]`,
 		DetailBookCoverRule:         `//div[@id="sidebar"]/div[@id="fmimg"]/img/@data-original]`,
@@ -40,6 +40,8 @@ var BookSources = map[int64]datamodels.BookSource{
 		DetailBookDescriptionRule:   `//div[@id="intro"]/p[1]`,
 		DetailBookNewChapterRule:    `//div[@id="info"]/p[4]/a`,
 		DetailBookNewChapterUrlRule: `//div[@id="info"]/p[4]/a`,
+		DetailBookFirstChapterRule:  `//div[@id="list"]/dl/dd[1]/a`,
+		DetailBookFirstUrlRule:      `//div[@id="list"]/dl/dd[1]/a`,
 
 		DetailChapterRule:      `//div[@id="list"]/dl/dd`,
 		DetailChapterTitleRule: `./a`,
@@ -84,6 +86,8 @@ var BookSources = map[int64]datamodels.BookSource{
 		DetailBookDescriptionRule:   `//div[@id="intro"]/p[1]`,
 		DetailBookNewChapterRule:    `//div[@id="info"]/p[4]/a`,
 		DetailBookNewChapterUrlRule: `//div[@id="info"]/p[4]/a`,
+		DetailBookFirstChapterRule:  `//div[@id="list"]/dl/dd[1]/a`,
+		DetailBookFirstUrlRule:      `//div[@id="list"]/dl/dd[1]/a`,
 
 		DetailChapterRule:      `//div[@id="list"]/dl/dd`,
 		DetailChapterTitleRule: `./a`,
