@@ -1,6 +1,8 @@
 package fetcher
 
 import (
+	"github.com/dreamlu/gt/tool/conf"
+	"github.com/dreamlu/gt/tool/util/cons"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/debug"
 	"github.com/gocolly/colly/v2/extensions"
@@ -9,7 +11,13 @@ import (
 
 // 提取器
 func NewFetcher() *colly.Collector {
-	c := colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
+	var c *colly.Collector
+	if conf.GetString("app.devMode") != cons.Prod {
+		c = colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
+	} else {
+		c = colly.NewCollector()
+	}
+
 	extensions.Referer(c)
 	extensions.RandomUserAgent(c)
 

@@ -11,6 +11,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		SourceKey:  "beqegecc",
 
 		ClassifyUrl: map[string][]string{
+			cons.IntelRec:  {"http://www.beqege.cc"},
 			cons.Classify1: {"http://www.beqege.cc/class1/"},
 			cons.Classify2: {"http://www.beqege.cc/class2/"},
 			cons.Classify3: {"http://www.beqege.cc/class6/"},
@@ -57,6 +58,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		SourceKey:  "biquge",
 
 		ClassifyUrl: map[string][]string{
+			cons.IntelRec:  {"http://www.biquge.info"},
 			cons.Classify1: {"http://www.biquge.info/list/1_1.html"},
 			cons.Classify2: {"http://www.biquge.info/list/2_1.html"},
 			cons.Classify3: {"http://www.biquge.info/list/6_1.html"},

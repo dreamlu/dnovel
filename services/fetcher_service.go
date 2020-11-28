@@ -93,12 +93,19 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 	}
 
 	f := fetcher.NewFetcher()
+	//f.Async = true // f.wait() // 异步执行
+	q, _ := queue.New(
+		10, // Number of consumer threads
+		&queue.InMemoryQueueStorage{MaxSize: 100}, // Use default queue storage
+	)
 
 	f.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
 		chapterList = append(chapterList, s.parseChapterList(&source, e, url))
 		return
 	})
-	f.Visit(url)
+	//f.Visit(url)
+	q.AddURL(url)
+	q.Run(f)
 	return
 }
 
