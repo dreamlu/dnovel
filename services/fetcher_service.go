@@ -57,15 +57,31 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 	for i := range bookSources {
 		source := &bookSources[i]
 		f := fetcher.NewFetcher()
+
+		url := fmt.Sprintf(source.SearchURL, keyword)
 		q, _ := queue.New(
 			10, // Number of consumer threads
 			&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 		)
+		// 反爬破解
+		f.OnResponse(func(res *colly.Response) {
+			if source.SourceKey == "biquge" {
+				newUrl := resBody(res.Body)
+				if newUrl != "" {
+					q, _ := queue.New(
+						10, // Number of consumer threads
+						&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
+					)
+					q.AddURL(url + newUrl)
+					q.Run(f)
+				}
+			}
+		})
 
 		f.OnXML(source.SearchItemRule, func(e *colly.XMLElement) {
 			itemList = append(itemList, s.parseItemSearch(source, e))
 		})
-		q.AddURL(fmt.Sprintf(source.SearchURL, keyword))
+		q.AddURL(url)
 		q.Run(f)
 	}
 	return
