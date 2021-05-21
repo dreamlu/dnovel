@@ -3,6 +3,6 @@ git pull
 ./devMode.sh prod
 
 cd docker
-./pu.sh
+./pushAll.sh
 cd ..
 ./devMode.sh dev
