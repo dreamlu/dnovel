@@ -1,3 +1,4 @@
 main
 .idea
 docker/pu.sh
+go.sum
