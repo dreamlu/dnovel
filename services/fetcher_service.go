@@ -160,6 +160,7 @@ func (s *fetcherService) parseItemSearch(source *datamodels.BookSource, doc *col
 		URL:        ele.ChildUrl(source.SearchItemURLRule, "href"),
 		Source:     source.SourceKey,
 	}
+	item.URL = strings.Replace(item.URL, "m.", "", 1)
 	if strings.Contains(item.Author, "：") {
 		item.Author = strings.Split(item.Author, "：")[1]
 	}
