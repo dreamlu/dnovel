@@ -10,6 +10,8 @@ type BookSource struct {
 	ClassifyItemName   string              `json:"classify_item_name"`   // 小说名称
 	ClassifyItemAuthor string              `json:"classify_item_author"` // 作者
 	ClassifyItemUrl    string              `json:"classify_item_url"`    // 书url
+	ClassifyItemCover  string              `json:"classify_item_cover"`  // 书封面
+	ClassifyItemDesc   string              `json:"classify_item_desc"`   // 书籍描述
 
 	SearchURL                string `json:"search_url" comment:"搜索网址"`
 	SearchItemRule           string `json:"search_list_rule" comment:"搜索结果规则"`

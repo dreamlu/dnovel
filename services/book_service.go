@@ -24,7 +24,7 @@ var (
 	fService = NewFetcherService()
 )
 
-var Classifys = []string{cons.IntelRec, cons.Classify1, cons.Classify2, cons.Classify3, cons.Classify4, cons.Classify5, cons.Classify6}
+var Classifys = []string{cons.Classify1, cons.Classify2, cons.Classify3, cons.Classify4, cons.Classify5, cons.Classify6}
 
 func (s *bookService) GetClassify() (cs []*datamodels.Classify) {
 

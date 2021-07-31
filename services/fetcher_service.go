@@ -140,13 +140,22 @@ func (s *fetcherService) GetContent(detailURL string, chapterURL string, key str
 }
 
 func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
-	var ele = fetcher.NewXMLElement(doc)
-	item = &datamodels.BookInfo{
-		Name:   ele.ChildText(source.ClassifyItemName),
-		Author: ele.ChildText(source.ClassifyItemAuthor),
-		URL:    ele.ChildUrl(source.ClassifyItemUrl, "href"),
-		Source: source.SourceKey,
+	var (
+		ele   = fetcher.NewXMLElement(doc)
+		cover = "src"
+	)
+	if source.SourceKey == "beqegecc" {
+		cover = "data-original"
 	}
+	item = &datamodels.BookInfo{
+		Name:        ele.ChildText(source.ClassifyItemName),
+		Author:      ele.ChildText(source.ClassifyItemAuthor),
+		URL:         ele.ChildUrl(source.ClassifyItemUrl, "href"),
+		Cover:       ele.ChildUrl(source.ClassifyItemCover, cover),
+		Description: ele.ChildText(source.ClassifyItemDesc),
+		Source:      source.SourceKey,
+	}
+	item.URL = strings.Replace(item.URL, "m.", "", 1)
 	return
 }
 
