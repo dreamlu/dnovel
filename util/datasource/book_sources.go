@@ -105,16 +105,16 @@ var BookSources = map[int64]datamodels.BookSource{
 	//},
 	2: {
 		SourceName: "笔趣阁",
-		SourceKey:  "sobiquge",
+		SourceKey:  "biqugee",
 
 		ClassifyUrl: map[string][]string{
 			//cons.IntelRec:  {"https://www.sobiquge.com/"},
-			cons.Classify1: {"https://m.sobiquge.com/xuanhuan"},
-			cons.Classify2: {"https://m.sobiquge.com/xiuzhen"},
-			cons.Classify3: {"https://m.sobiquge.com/kehuan"},
-			cons.Classify4: {"https://m.sobiquge.com/wangyou"},
-			cons.Classify5: {"https://m.sobiquge.com/lishi"},
-			cons.Classify6: {"https://m.sobiquge.com/dushi"},
+			cons.Classify1: {"https://m.biqugee.com/xuanhuan"},
+			cons.Classify2: {"https://m.biqugee.com/xiuzhen"},
+			cons.Classify3: {"https://m.biqugee.com/kehuan"},
+			cons.Classify4: {"https://m.biqugee.com/wangyou"},
+			cons.Classify5: {"https://m.biqugee.com/lishi"},
+			cons.Classify6: {"https://m.biqugee.com/dushi"},
 		},
 		ClassifyItemRule:   `//div[@class="bookbox"]`,
 		ClassifyItemName:   `//div[@class="bookinfo"]/h4/i/a`,
@@ -123,7 +123,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		ClassifyItemCover:  `//div[@class="bookimg"]/a/img`,
 		ClassifyItemDesc:   `//div[@class="intro_line"]`,
 
-		SearchURL:                "https://m.sobiquge.com/search.php?q=%s",
+		SearchURL:                "https://m.biqugee.com/search.php?q=%s",
 		SearchItemRule:           `//div[@class="result-item result-game-item"]`,
 		SearchItemNameRule:       "./div[2]/h3/a/span",
 		SearchItemAuthorRule:     "./div[2]/div/p[1]/span[2]",
