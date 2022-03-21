@@ -224,5 +224,8 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 		NextURL:     ele.ChildUrl(source.ContentNextURLRule, "href"),
 		Source:      source.SourceKey,
 	}
+	i := strings.Index(content.Text, "<p><a")
+	k := strings.Index(content.Text, "a></p>")
+	content.Text = content.Text[:i] + content.Text[k+6:]
 	return content
 }
