@@ -1,6 +1,6 @@
 app:
   # dev mode
-  devMode: dev
+  devMode: prod
   port: 8022
   # database
   db:
