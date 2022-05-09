@@ -155,7 +155,7 @@ func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *c
 		Description: ele.ChildText(source.ClassifyItemDesc),
 		Source:      source.SourceKey,
 	}
-	item.URL = strings.Replace(item.URL, "m.", "", 1)
+	item.URL = strings.Replace(item.URL, "m.", "www.", 1)
 	return
 }
 
