@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"fmt"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly/v2"
 	"golang.org/x/net/html"
@@ -38,6 +39,18 @@ func (h *XMLElement) ChildHtml(xpathQuery string) string {
 	if child == nil {
 		return ""
 	}
+	return strings.TrimSpace(htmlquery.OutputHTML(child, false))
+}
+
+func (h *XMLElement) ChildRemoveHtml(xpathQuery, remove string) string {
+	if xpathQuery == "" {
+		return ""
+	}
+	child := htmlquery.FindOne(h.DOM.(*html.Node), xpathQuery)
+	if child == nil {
+		return ""
+	}
+	child.RemoveChild(htmlquery.FindOne(h.DOM.(*html.Node), fmt.Sprintf("%s/%s", xpathQuery, remove)))
 	return strings.TrimSpace(htmlquery.OutputHTML(child, false))
 }
 
