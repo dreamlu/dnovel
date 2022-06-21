@@ -219,7 +219,6 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 	var ele = fetcher.NewXMLElement(doc)
 	content = datamodels.BookContent{
 		Title:       ele.ChildText(source.ContentTitleRule),
-		Text:        ele.ChildRemoveHtml(source.ContentTextRule, "div"),
 		CurrentURL:  url,
 		PreviousURL: ele.ChildUrl(source.ContentPreviousURLRule, "href"),
 		NextURL:     ele.ChildUrl(source.ContentNextURLRule, "href"),
@@ -232,12 +231,16 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 		if i != -1 {
 			content.Text = content.Text[i+4:]
 		}
+		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "div")
 	case "biqugee":
 		i := strings.Index(content.Text, "<p><a")
 		k := strings.Index(content.Text, "a></p>")
 		if i != -1 {
 			content.Text = content.Text[:i] + content.Text[k+6:]
 		}
+		content.Text = ele.ChildHtml(source.ContentTextRule)
+	default:
+		content.Text = ele.ChildHtml(source.ContentTextRule)
 	}
 	return content
 }
