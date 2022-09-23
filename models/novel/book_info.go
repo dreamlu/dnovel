@@ -1,4 +1,4 @@
-package datamodels
+package novel
 
 type BookInfo struct {
 	//Id_	string		`json:"id" bson:"_id" comment:"小说ID"`

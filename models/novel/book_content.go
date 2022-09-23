@@ -1,4 +1,4 @@
-package datamodels
+package novel
 
 type BookContent struct {
 	Title       string `json:"title" comment:"章节标题"`

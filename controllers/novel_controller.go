@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"dnovel/services"
+	"dnovel/services/novel"
 	"github.com/dreamlu/gt/tool/result"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type IndexController struct {
-	Service services.BookService
+	Service novel.BookService
 }
 
 func (c IndexController) GetClassify(u *gin.Context) {

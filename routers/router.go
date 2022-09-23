@@ -3,13 +3,9 @@ package routers
 
 import (
 	"dnovel/controllers"
-	"dnovel/services"
-	str2 "dnovel/util/cons"
-	"github.com/dreamlu/gt/cache"
+	"dnovel/services/novel"
 	"github.com/dreamlu/gt/tool/result"
-	"github.com/dreamlu/gt/tool/util/cons"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -18,8 +14,6 @@ import (
 const prefix = ""
 
 var Router = SetRouter()
-
-var V = Router.Group(prefix)
 
 func SetRouter() *gin.Engine {
 	// Disable Console Color
@@ -30,20 +24,8 @@ func SetRouter() *gin.Engine {
 	//router.Use(CorsMiddleware())
 
 	// 过滤器
-	router.Use(Filter())
+	//router.Use(Filter())
 	router.Use(Recover)
-	//权限中间件
-	// load the casbin model and policy from files, database is also supported.
-	//e := casbin.NewEnforcer("conf/authz_model.conf", "conf/authz_policy.csv")
-	//router.Use(authz.NewAuthorizer(e))
-
-	//cookie session
-	//store := cookie.NewStore([]byte("secret"))
-	//router.Use(sessions.Sessions("mysession", store))
-
-	//redis session
-	//store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
-	//router.Use(sessions.Sessions("mysession", store))
 
 	// Ping test
 	router.GET("/ping", func(c *gin.Context) {
@@ -59,7 +41,7 @@ func SetRouter() *gin.Engine {
 		// root:静态文件所在目录
 		v.Static("static", "static")
 		// v.GET("/statics/file", file.StaticFile)
-		inc := controllers.IndexController{Service: services.NewBookService()}
+		inc := controllers.IndexController{Service: novel.NewBookService()}
 		v.GET("/classify", inc.GetClassify)
 		v.GET("/classify/info", inc.GetClassifyInfo)
 		v.GET("/search", inc.GetSearch)
@@ -75,44 +57,6 @@ func SetRouter() *gin.Engine {
 		})
 	})
 	return router
-}
-
-// 登录失效验证
-func Filter() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 127请求且本地开发且为dev时无需验证,方便自己测试
-		if strings.Contains(c.Request.RemoteAddr, "127.0.0.1") &&
-			str2.DevMode == cons.Dev {
-			c.Next()
-			return
-		}
-
-		if c.Request.Method == "GET" {
-			c.Next()
-			return
-		}
-		path := c.Request.URL.String()
-
-		if !strings.Contains(path, "login") && !strings.Contains(path, "/static/file") {
-			r := c.Request
-			token := r.Header.Get("token")
-			if token == "" {
-				c.Abort()
-				c.JSON(http.StatusOK, result.GetError("缺少token"))
-				return
-			}
-			ca := cache.NewCache()
-			log.Println("[token]:", token)
-			cam, err := ca.Get(token)
-			if err != nil {
-				c.Abort()
-				c.JSON(http.StatusOK, result.MapNoAuth)
-				return
-			}
-			// 延长token对应时间
-			_ = ca.Set(token, cam)
-		}
-	}
 }
 
 // 异常捕获

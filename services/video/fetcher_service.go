@@ -1,7 +1,7 @@
-package services
+package video
 
 import (
-	"dnovel/models/datamodels"
+	"dnovel/models/video"
 	"dnovel/util/fetcher"
 	"fmt"
 	"github.com/gocolly/colly/v2"
@@ -10,11 +10,11 @@ import (
 )
 
 type FetcherService interface {
-	GetClassifyInfo(classify string) []*datamodels.BookInfo                                      // 分类书籍查找
-	GetItemList(keyword string) []*datamodels.BookInfo                                           // 关键字查找
-	GetItem(url string, key string) datamodels.BookInfo                                          // 书籍详情
-	GetChapterList(url string, key string) []datamodels.Chapter                                  // 章节列表
-	GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
+	GetClassifyInfo(classify string) []*video.VideoInfo                                      // 分类书籍查找
+	GetItemList(keyword string) []*video.VideoInfo                                           // 关键字查找
+	GetItem(url string, key string) video.VideoInfo                                          // 书籍详情
+	GetChapterList(url string, key string) []video.Chapter                                   // 章节列表
+	GetContent(detailURL string, chapterURL string, key string) (content video.VideoContent) // 获得内容
 }
 
 func NewFetcherService() FetcherService {
@@ -22,17 +22,17 @@ func NewFetcherService() FetcherService {
 }
 
 var (
-	sourceService = NewBookSourceService()
+	sourceService = NewVideoSourceService()
 )
 
 type fetcherService struct{}
 
 // 分类书籍查找
-func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodels.BookInfo) {
+func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*video.VideoInfo) {
 	bookSources := sourceService.GetAllSource()
 
 	for i := range bookSources {
-		source := &bookSources[i]
+		source := bookSources[i]
 
 		for _, url := range source.ClassifyUrl[classify] {
 			f := fetcher.NewFetcher()
@@ -41,7 +41,7 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 				&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 			)
 			f.OnXML(source.ClassifyItemRule, func(e *colly.XMLElement) {
-				itemList = append(itemList, s.parseClassifyInfo(source, e))
+				itemList = append(itemList, s.parseClassifyInfo(&source, e))
 			})
 			q.AddURL(url)
 			q.Run(f)
@@ -51,11 +51,11 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 }
 
 // 关键字搜索
-func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.BookInfo) {
+func (s *fetcherService) GetItemList(keyword string) (itemList []*video.VideoInfo) {
 	bookSources := sourceService.GetAllSource()
 
 	for i := range bookSources {
-		source := &bookSources[i]
+		source := bookSources[i]
 		f := fetcher.NewFetcher()
 
 		url := fmt.Sprintf(source.SearchURL, keyword)
@@ -79,7 +79,7 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 		//})
 
 		f.OnXML(source.SearchItemRule, func(e *colly.XMLElement) {
-			itemList = append(itemList, s.parseItemSearch(source, e))
+			itemList = append(itemList, s.parseItemSearch(&source, e))
 		})
 		q.AddURL(url)
 		q.Run(f)
@@ -87,14 +87,11 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 	return
 }
 
-func (s *fetcherService) GetItem(url string, key string) (info datamodels.BookInfo) {
-	source, ok := sourceService.GetSourceByKey(key)
-	if !ok {
-		return
-	}
+func (s *fetcherService) GetItem(url string, key string) (info video.VideoInfo) {
+	source := sourceService.GetSourceByKey(key)
 
 	f := fetcher.NewFetcher()
-	f.OnXML(source.DetailBookItemRule, func(e *colly.XMLElement) {
+	f.OnXML(source.DetailVideoItemRule, func(e *colly.XMLElement) {
 		info = s.parseItemInfo(&source, e)
 	})
 
@@ -103,11 +100,8 @@ func (s *fetcherService) GetItem(url string, key string) (info datamodels.BookIn
 	return
 }
 
-func (s *fetcherService) GetChapterList(url string, key string) (chapterList []datamodels.Chapter) {
-	source, ok := sourceService.GetSourceByKey(key)
-	if !ok {
-		return
-	}
+func (s *fetcherService) GetChapterList(url string, key string) (chapterList []video.Chapter) {
+	source := sourceService.GetSourceByKey(key)
 
 	f := fetcher.NewFetcher()
 	//f.Async = true // f.wait() // 异步执行
@@ -126,11 +120,8 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 	return
 }
 
-func (s *fetcherService) GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
-	source, ok := sourceService.GetSourceByKey(key)
-	if !ok {
-		return
-	}
+func (s *fetcherService) GetContent(detailURL string, chapterURL string, key string) (content video.VideoContent) {
+	source := sourceService.GetSourceByKey(key)
 
 	f := fetcher.NewFetcher()
 	f.OnXML("//body", func(e *colly.XMLElement) {
@@ -140,7 +131,7 @@ func (s *fetcherService) GetContent(detailURL string, chapterURL string, key str
 	return
 }
 
-func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
+func (s *fetcherService) parseClassifyInfo(source *video.VideoSource, doc *colly.XMLElement) (item *video.VideoInfo) {
 	var (
 		ele   = fetcher.NewXMLElement(doc)
 		cover = "src"
@@ -148,7 +139,7 @@ func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *c
 	if source.SourceKey == "beqegecc" {
 		cover = "data-original"
 	}
-	item = &datamodels.BookInfo{
+	item = &video.VideoInfo{
 		Name:        ele.ChildText(source.ClassifyItemName),
 		Author:      ele.ChildText(source.ClassifyItemAuthor),
 		URL:         ele.ChildUrl(source.ClassifyItemUrl, "href"),
@@ -160,9 +151,9 @@ func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *c
 	return
 }
 
-func (s *fetcherService) parseItemSearch(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
+func (s *fetcherService) parseItemSearch(source *video.VideoSource, doc *colly.XMLElement) (item *video.VideoInfo) {
 	var ele = fetcher.NewXMLElement(doc)
-	item = &datamodels.BookInfo{
+	item = &video.VideoInfo{
 		Name:       ele.ChildText(source.SearchItemNameRule),
 		Author:     ele.ChildText(source.SearchItemAuthorRule),
 		Cover:      ele.ChildAttr(source.SearchItemCoverRule, "src"),
@@ -181,18 +172,18 @@ var (
 	auts = []string{":", "："}
 )
 
-func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly.XMLElement) (info datamodels.BookInfo) {
+func (s *fetcherService) parseItemInfo(source *video.VideoSource, doc *colly.XMLElement) (info video.VideoInfo) {
 	var ele = fetcher.NewXMLElement(doc)
-	info = datamodels.BookInfo{
-		Name:         ele.ChildText(source.DetailBookNameRule),
-		Author:       ele.ChildText(source.DetailBookAuthorRule),
-		Cover:        ele.ChildUrlText(source.DetailBookCoverRule),
-		Category:     ele.ChildText(source.DetailBookCategoryRule),
-		Description:  ele.ChildHtml(source.DetailBookDescriptionRule),
-		NewChapter:   ele.ChildText(source.DetailBookNewChapterRule),
-		URL:          ele.ChildUrl(source.DetailBookNewChapterUrlRule, "href"),
-		FirstChapter: ele.ChildText(source.DetailBookFirstChapterRule),
-		FirstURL:     ele.ChildUrl(source.DetailBookFirstUrlRule, "href"),
+	info = video.VideoInfo{
+		Name:         ele.ChildText(source.DetailVideoNameRule),
+		Author:       ele.ChildText(source.DetailVideoAuthorRule),
+		Cover:        ele.ChildUrlText(source.DetailVideoCoverRule),
+		Category:     ele.ChildText(source.DetailVideoCategoryRule),
+		Description:  ele.ChildHtml(source.DetailVideoDescriptionRule),
+		NewChapter:   ele.ChildText(source.DetailVideoNewChapterRule),
+		URL:          ele.ChildUrl(source.DetailVideoNewChapterUrlRule, "href"),
+		FirstChapter: ele.ChildText(source.DetailVideoFirstChapterRule),
+		FirstURL:     ele.ChildUrl(source.DetailVideoFirstUrlRule, "href"),
 		Source:       source.SourceKey,
 	}
 	for _, v := range auts {
@@ -203,9 +194,9 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 	return
 }
 
-func (s *fetcherService) parseChapterList(source *datamodels.BookSource, doc *colly.XMLElement, url string) (chapter datamodels.Chapter) {
+func (s *fetcherService) parseChapterList(source *video.VideoSource, doc *colly.XMLElement, url string) (chapter video.Chapter) {
 	var ele = fetcher.NewXMLElement(doc)
-	chapter = datamodels.Chapter{
+	chapter = video.Chapter{
 		Title:      ele.ChildText(source.DetailChapterTitleRule),
 		DetailURL:  url,
 		ChapterURL: ele.ChildUrl(source.DetailChapterURLRule, "href"),
@@ -215,9 +206,9 @@ func (s *fetcherService) parseChapterList(source *datamodels.BookSource, doc *co
 	return
 }
 
-func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.XMLElement, url string) (content datamodels.BookContent) {
+func (s *fetcherService) parseContent(source *video.VideoSource, doc *colly.XMLElement, url string) (content video.VideoContent) {
 	var ele = fetcher.NewXMLElement(doc)
-	content = datamodels.BookContent{
+	content = video.VideoContent{
 		Title:       ele.ChildText(source.ContentTitleRule),
 		CurrentURL:  url,
 		PreviousURL: ele.ChildUrl(source.ContentPreviousURLRule, "href"),

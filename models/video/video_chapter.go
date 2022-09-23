@@ -1,4 +1,4 @@
-package datamodels
+package video
 
 type Chapter struct {
 	Title      string `json:"title" comment:"章节标题"`

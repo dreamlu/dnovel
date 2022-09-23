@@ -1,4 +1,4 @@
-package datamodels
+package models
 
 // 分类模型
 type Classify struct {

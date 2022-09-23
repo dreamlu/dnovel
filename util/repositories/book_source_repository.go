@@ -1,26 +1,26 @@
 package repositories
 
 import (
-	"dnovel/models/datamodels"
+	"dnovel/models/novel"
 	"sync"
 )
 
-type Query func(source datamodels.BookSource) bool
+type Query func(source novel.BookSource) bool
 
 type BookSourceRepository interface {
 	Exec(query Query, action Query, limit int, mode int) (ok bool)
-	Select(query Query) (movie datamodels.BookSource, found bool)
-	SelectMany(query Query, limit int) (results []datamodels.BookSource)
+	Select(query Query) (movie novel.BookSource, found bool)
+	SelectMany(query Query, limit int) (results []novel.BookSource)
 }
 
-func NewBookSourceRepository(source map[int64]datamodels.BookSource) BookSourceRepository {
+func NewBookSourceRepository(source map[int64]novel.BookSource) BookSourceRepository {
 	return &bookSourceRepository{
 		source: source,
 	}
 }
 
 type bookSourceRepository struct {
-	source map[int64]datamodels.BookSource
+	source map[int64]novel.BookSource
 	mu     sync.RWMutex
 }
 
@@ -57,20 +57,20 @@ func (r *bookSourceRepository) Exec(query Query, action Query, actionLimit int, 
 	return
 }
 
-func (r *bookSourceRepository) Select(query Query) (movie datamodels.BookSource, found bool) {
-	found = r.Exec(query, func(m datamodels.BookSource) bool {
+func (r *bookSourceRepository) Select(query Query) (movie novel.BookSource, found bool) {
+	found = r.Exec(query, func(m novel.BookSource) bool {
 		movie = m
 		return true
 	}, 1, ReadOnlyMode)
 	//设置一个空的datamodels.Movie，如果根本找不到的话。
 	if !found {
-		movie = datamodels.BookSource{}
+		movie = novel.BookSource{}
 	}
 	return
 }
 
-func (r *bookSourceRepository) SelectMany(query Query, limit int) (results []datamodels.BookSource) {
-	r.Exec(query, func(m datamodels.BookSource) bool {
+func (r *bookSourceRepository) SelectMany(query Query, limit int) (results []novel.BookSource) {
+	r.Exec(query, func(m novel.BookSource) bool {
 		results = append(results, m)
 		return true
 	}, limit, ReadOnlyMode)

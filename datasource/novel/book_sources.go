@@ -1,12 +1,12 @@
-package datasource
+package novel
 
 import (
-	"dnovel/models/datamodels"
+	"dnovel/models/novel"
 	"dnovel/util/cons"
 )
 
 // XPATH: 语法
-var BookSources = map[int64]datamodels.BookSource{
+var BookSources = map[int64]novel.BookSource{
 	1: {
 		SourceName: "笔趣阁cc",
 		SourceKey:  "beqegecc",
