@@ -227,11 +227,11 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 	// bequgee
 	switch source.SourceKey {
 	case "ibiquge":
+		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "div")
 		i := strings.Index(content.Text, "</p>")
 		if i != -1 {
 			content.Text = content.Text[i+4:]
 		}
-		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "div")
 	//case "biqugee":
 	//	content.Text = ele.ChildHtml(source.ContentTextRule)
 	default:
