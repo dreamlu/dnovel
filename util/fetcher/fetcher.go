@@ -12,10 +12,12 @@ import (
 // 提取器
 func NewFetcher() *colly.Collector {
 	var c *colly.Collector
+	dg := colly.Debugger(&debug.LogDebugger{})
+	ag := colly.UserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
 	if conf.GetString("app.devMode") != cons.Prod {
-		c = colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
+		c = colly.NewCollector(dg, ag)
 	} else {
-		c = colly.NewCollector()
+		c = colly.NewCollector(ag)
 	}
 
 	extensions.Referer(c)

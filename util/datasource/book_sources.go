@@ -13,12 +13,12 @@ var BookSources = map[int64]datamodels.BookSource{
 
 		ClassifyUrl: map[string][]string{
 			//cons.IntelRec:  {"http://m.beqege.cc"},
-			cons.Classify1: {"http://m.beqege.cc/class1/"},
-			cons.Classify2: {"http://m.beqege.cc/class2/"},
-			cons.Classify3: {"http://m.beqege.cc/class6/"},
-			cons.Classify4: {"http://m.beqege.cc/class5/"},
-			cons.Classify5: {"http://m.beqege.cc/class4/"},
-			cons.Classify6: {"http://m.beqege.cc/class3/"},
+			cons.Classify1: {"https://m.beqege.cc/class1/"},
+			cons.Classify2: {"https://m.beqege.cc/class2/"},
+			cons.Classify3: {"https://m.beqege.cc/class6/"},
+			cons.Classify4: {"https://m.beqege.cc/class5/"},
+			cons.Classify5: {"https://m.beqege.cc/class4/"},
+			cons.Classify6: {"https://m.beqege.cc/class3/"},
 		},
 		ClassifyItemRule:   `//div[@class="recommend"]/div[@class="booklist border-bottom"]`,
 		ClassifyItemName:   `//div[@class="bookinfo"]/div[1]/a`,
@@ -27,7 +27,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		ClassifyItemCover:  `//a[@class="bookimg"]/img`,
 		ClassifyItemDesc:   `//div[@class="bookinfo"]/div[3]`,
 
-		SearchURL:            "http://www.beqege.cc/search.php?keyword=%s",
+		SearchURL:            "https://www.beqege.cc/search.php?keyword=%s",
 		SearchItemRule:       `//ul[@class="chapter-list"]/li`,
 		SearchItemNameRule:   `./span[@class="s2"]/a`,
 		SearchItemAuthorRule: `./span[@class="s4"]`,
