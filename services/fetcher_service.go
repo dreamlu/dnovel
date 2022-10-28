@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
+	"net/url"
 	"strings"
 )
 
@@ -58,6 +59,9 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 		source := &bookSources[i]
 		f := fetcher.NewFetcher()
 
+		if source.SourceKey == "qxzx8" {
+			keyword = url.QueryEscape(keyword)
+		}
 		url := fmt.Sprintf(source.SearchURL, keyword)
 		q, _ := queue.New(
 			10, // Number of consumer threads
@@ -162,10 +166,14 @@ func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *c
 
 func (s *fetcherService) parseItemSearch(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
 	var ele = fetcher.NewXMLElement(doc)
+	var cover = ele.ChildAttr(source.SearchItemCoverRule, "src")
+	if source.SourceKey == "qxzx8" {
+		cover = ele.ChildUrl(source.SearchItemCoverRule, "src")
+	}
 	item = &datamodels.BookInfo{
 		Name:       ele.ChildText(source.SearchItemNameRule),
 		Author:     ele.ChildText(source.SearchItemAuthorRule),
-		Cover:      ele.ChildAttr(source.SearchItemCoverRule, "src"),
+		Cover:      cover,
 		NewChapter: ele.ChildText(source.SearchItemNewChapterRule),
 		URL:        ele.ChildUrl(source.SearchItemURLRule, "href"),
 		Source:     source.SourceKey,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-git pull
+#git pull
 ./devMode.sh prod
 
 cd docker
