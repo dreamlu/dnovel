@@ -5,6 +5,7 @@ import (
 	"dnovel/controllers"
 	"dnovel/services"
 	str2 "dnovel/util/cons"
+	"dnovel/util/file"
 	"github.com/dreamlu/gt/cache"
 	"github.com/dreamlu/gt/tool/result"
 	"github.com/dreamlu/gt/tool/util/cons"
@@ -66,6 +67,7 @@ func SetRouter() *gin.Engine {
 		v.GET("/info", inc.GetInfo)
 		v.GET("/chapters", inc.GetChapters)
 		v.GET("/read", inc.GetRead)
+		v.GET("/file", file.StaticFile)
 	}
 	//不存在路由
 	router.NoRoute(func(c *gin.Context) {

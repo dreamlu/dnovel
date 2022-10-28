@@ -4,6 +4,7 @@ import (
 	"dnovel/models/datamodels"
 	"dnovel/util/fetcher"
 	"fmt"
+	"github.com/dreamlu/gt/tool/conf"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
 	"net/url"
@@ -64,7 +65,7 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 		}
 		url := fmt.Sprintf(source.SearchURL, keyword)
 		q, _ := queue.New(
-			10, // Number of consumer threads
+			3, // Number of consumer threads
 			&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
 		)
 		// 反爬破解
@@ -147,16 +148,17 @@ func (s *fetcherService) GetContent(detailURL string, chapterURL string, key str
 func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *colly.XMLElement) (item *datamodels.BookInfo) {
 	var (
 		ele   = fetcher.NewXMLElement(doc)
-		cover = "src"
+		cover = ele.ChildUrl(source.ClassifyItemCover, "src")
 	)
 	if source.SourceKey == "beqegecc" {
-		cover = "data-original"
+		cover = ele.ChildUrl(source.ClassifyItemCover, "data-original")
+		cover = fmt.Sprintf("%s/file?url=%s", conf.GetString("app.requestUrl"), cover)
 	}
 	item = &datamodels.BookInfo{
 		Name:        ele.ChildText(source.ClassifyItemName),
 		Author:      ele.ChildText(source.ClassifyItemAuthor),
 		URL:         ele.ChildUrl(source.ClassifyItemUrl, "href"),
-		Cover:       ele.ChildUrl(source.ClassifyItemCover, cover),
+		Cover:       cover,
 		Description: ele.ChildText(source.ClassifyItemDesc),
 		Source:      source.SourceKey,
 	}
