@@ -4,7 +4,7 @@ import (
 	"dnovel/models/datamodels"
 	"dnovel/util/fetcher"
 	"fmt"
-	"github.com/dreamlu/gt/tool/conf"
+	"github.com/dreamlu/gt/conf"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
 	"net/url"
@@ -12,11 +12,11 @@ import (
 )
 
 type FetcherService interface {
-	GetClassifyInfo(classify string) []*datamodels.BookInfo                                      // 分类书籍查找
-	GetItemList(keyword string) []*datamodels.BookInfo                                           // 关键字查找
-	GetItem(url string, key string) datamodels.BookInfo                                          // 书籍详情
-	GetChapterList(url string, key string) []datamodels.Chapter                                  // 章节列表
-	GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
+	GetClassifyInfo(classify string) []*datamodels.BookInfo                                   // 分类书籍查找
+	GetItemList(keyword string) []*datamodels.BookInfo                                        // 关键字查找
+	GetInfo(url string, key string) datamodels.BookInfo                                       // 书籍详情
+	GetChapterList(url string, key string) []datamodels.Chapter                               // 章节列表
+	GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
 }
 
 func NewFetcherService() FetcherService {
@@ -37,6 +37,9 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 		source := &bookSources[i]
 
 		for _, url := range source.ClassifyUrl[classify] {
+			if strings.Contains(source.SourceKey, "beqegecc") {
+				url = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), url)
+			}
 			f := fetcher.NewFetcher()
 			q, _ := queue.New(
 				10, // Number of consumer threads
@@ -58,46 +61,38 @@ func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.Boo
 
 	for i := range bookSources {
 		source := &bookSources[i]
-		f := fetcher.NewFetcher()
 
 		if source.SourceKey == "qxzx8" {
 			keyword = url.QueryEscape(keyword)
 		}
 		url := fmt.Sprintf(source.SearchURL, keyword)
-		q, _ := queue.New(
-			3, // Number of consumer threads
-			&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
-		)
-		// 反爬破解
-		//f.OnResponse(func(res *colly.Response) {
-		//	if source.SourceKey == "biquge" {
-		//		newUrl := resBody(res.Body)
-		//		if newUrl != "" {
-		//			q, _ := queue.New(
-		//				10, // Number of consumer threads
-		//				&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
-		//			)
-		//			q.AddURL(url + newUrl)
-		//			q.Run(f)
-		//		}
-		//	}
-		//})
+		if strings.Contains(source.SourceKey, "beqegecc") {
+			url = fmt.Sprintf("%s/rs?method=POST&url=%s", conf.Get[string]("app.requestUrl"), url)
+		}
 
+		f := fetcher.NewFetcher()
 		f.OnXML(source.SearchItemRule, func(e *colly.XMLElement) {
 			itemList = append(itemList, s.parseItemSearch(source, e))
 		})
-		q.AddURL(url)
-		q.Run(f)
+		f.Visit(url)
+		//q, _ := queue.New(
+		//	3, // Number of consumer threads
+		//	&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
+		//)
+		//q.AddURL(url)
+		//q.Run(f)
 	}
 	return
 }
 
-func (s *fetcherService) GetItem(url string, key string) (info datamodels.BookInfo) {
+func (s *fetcherService) GetInfo(url string, key string) (info datamodels.BookInfo) {
 	source, ok := sourceService.GetSourceByKey(key)
 	if !ok {
 		return
 	}
-
+	if strings.Contains(source.SourceKey, "beqegecc") {
+		url = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), url)
+	}
 	f := fetcher.NewFetcher()
 	f.OnXML(source.DetailBookItemRule, func(e *colly.XMLElement) {
 		info = s.parseItemInfo(&source, e)
@@ -114,29 +109,28 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 		return
 	}
 
+	url = strings.Replace(url, "m.", "www.", 1)
+	if strings.Contains(source.SourceKey, "beqegecc") {
+		url = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), url)
+	}
 	f := fetcher.NewFetcher()
-	//f.Async = true // f.wait() // 异步执行
-	q, _ := queue.New(
-		10, // Number of consumer threads
-		&queue.InMemoryQueueStorage{MaxSize: 100}, // Use default queue storage
-	)
-
 	f.OnXML(source.DetailChapterRule, func(e *colly.XMLElement) {
 		chapterList = append(chapterList, s.parseChapterList(&source, e, url))
 		return
 	})
-	url = strings.Replace(url, "m.", "www.", 1)
-	q.AddURL(url)
-	q.Run(f)
+	f.Visit(url)
 	return
 }
 
-func (s *fetcherService) GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
+func (s *fetcherService) GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
 	source, ok := sourceService.GetSourceByKey(key)
 	if !ok {
 		return
 	}
 
+	if strings.Contains(source.SourceKey, "beqegecc") {
+		chapterURL = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), chapterURL)
+	}
 	f := fetcher.NewFetcher()
 	f.OnXML("//body", func(e *colly.XMLElement) {
 		content = s.parseContent(&source, e, chapterURL)
@@ -152,7 +146,7 @@ func (s *fetcherService) parseClassifyInfo(source *datamodels.BookSource, doc *c
 	)
 	if source.SourceKey == "beqegecc" {
 		cover = ele.ChildUrl(source.ClassifyItemCover, "data-original")
-		cover = fmt.Sprintf("%s/file?url=%s", conf.GetString("app.requestUrl"), cover)
+		cover = fmt.Sprintf("%s/file?url=%s", conf.Get[string]("app.requestUrl"), cover)
 	}
 	item = &datamodels.BookInfo{
 		Name:        ele.ChildText(source.ClassifyItemName),
@@ -242,8 +236,8 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 		if i != -1 {
 			content.Text = content.Text[i+4:]
 		}
-	//case "biqugee":
-	//	content.Text = ele.ChildHtml(source.ContentTextRule)
+	case "xbiquge":
+		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "p")
 	default:
 		content.Text = ele.ChildHtml(source.ContentTextRule)
 		i := strings.Index(content.Text, "<p><a")

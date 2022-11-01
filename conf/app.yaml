@@ -1,7 +1,7 @@
 app:
   # dev mode
   devMode: dev
-  port: 8022
+  port: "8022"
   # database
   db:
     name: demo

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"dnovel/services"
-	"github.com/dreamlu/gt/tool/result"
+	"dnovel/util/result"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -49,7 +49,7 @@ func (c IndexController) GetRead(u *gin.Context) {
 	detailURL := u.Request.FormValue("detail_url") // 可不传
 	chapterURL := u.Request.FormValue("chapter_url")
 	source := u.Request.FormValue("source")
-	content := c.Service.GetContent(detailURL, chapterURL, source)
+	content := c.Service.GetRead(detailURL, chapterURL, source)
 
 	u.JSON(http.StatusOK, result.GetSuccess(content))
 }

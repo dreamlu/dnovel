@@ -27,7 +27,7 @@ var BookSources = map[int64]datamodels.BookSource{
 		ClassifyItemCover:  `//a[@class="bookimg"]/img`, // 403
 		ClassifyItemDesc:   `//div[@class="bookinfo"]/div[3]`,
 
-		SearchURL:            "http://www.beqege.cc/search.php?keyword=%s",
+		SearchURL:            "https://www.beqege.cc/search.php?keyword=%s",
 		SearchItemRule:       `//ul[@class="chapter-list"]/li`,
 		SearchItemNameRule:   `./span[@class="s2"]/a`,
 		SearchItemAuthorRule: `./span[@class="s4"]`,

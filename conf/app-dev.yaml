@@ -12,3 +12,4 @@ app:
     poolSize: 0
     minIdleConns: 0
     #password:
+  requestUrl: http://localhost:8022

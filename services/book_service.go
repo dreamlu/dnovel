@@ -6,12 +6,12 @@ import (
 )
 
 type BookService interface {
-	GetClassify() []*datamodels.Classify                                                  // 获得分类
-	GetClassifyInfo(classify string) []*datamodels.BookInfo                               // 获得分类详情书本信息
-	GetListByKeyword(keyword string) []*datamodels.BookInfo                               // 关键字搜索
-	GetInfo(url string, source string) datamodels.BookInfo                                // 详情
-	GetChapterList(url string, source string) []datamodels.Chapter                        // 章节列表
-	GetContent(detailURL string, chapterURL string, source string) datamodels.BookContent // 章节内容
+	GetClassify() []*datamodels.Classify                                               // 获得分类
+	GetClassifyInfo(classify string) []*datamodels.BookInfo                            // 获得分类详情书本信息
+	GetListByKeyword(keyword string) []*datamodels.BookInfo                            // 关键字搜索
+	GetInfo(url string, source string) datamodels.BookInfo                             // 详情
+	GetChapterList(url string, source string) []datamodels.Chapter                     // 章节列表
+	GetRead(detailURL string, chapterURL string, source string) datamodels.BookContent // 章节内容
 }
 
 func NewBookService() BookService {
@@ -46,7 +46,7 @@ func (s *bookService) GetListByKeyword(keyword string) (itemList []*datamodels.B
 }
 
 func (s *bookService) GetInfo(url string, key string) (info datamodels.BookInfo) {
-	info = fService.GetItem(url, key)
+	info = fService.GetInfo(url, key)
 	return
 }
 
@@ -55,7 +55,7 @@ func (s *bookService) GetChapterList(url string, key string) (chapterList []data
 	return
 }
 
-func (s *bookService) GetContent(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
-	content = fService.GetContent(detailURL, chapterURL, key)
+func (s *bookService) GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
+	content = fService.GetRead(detailURL, chapterURL, key)
 	return
 }

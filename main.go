@@ -2,7 +2,7 @@ package main
 
 import (
 	"dnovel/routers"
-	"github.com/dreamlu/gt/tool/conf"
+	"github.com/dreamlu/gt/conf"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,5 +13,5 @@ func main() {
 	// 性能调试
 	//pprof.Register(routers.Router)
 	// Listen and Server in 0.0.0.0:8080
-	_ = routers.Router.Run(":" + conf.GetString("app.port"))
+	_ = routers.Router.Run(":" + conf.Get[string]("app.port"))
 }

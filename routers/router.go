@@ -4,13 +4,9 @@ package routers
 import (
 	"dnovel/controllers"
 	"dnovel/services"
-	str2 "dnovel/util/cons"
-	"dnovel/util/file"
-	"github.com/dreamlu/gt/cache"
-	"github.com/dreamlu/gt/tool/result"
-	"github.com/dreamlu/gt/tool/util/cons"
+	"dnovel/util/request"
+	"dnovel/util/result"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -31,7 +27,6 @@ func SetRouter() *gin.Engine {
 	//router.Use(CorsMiddleware())
 
 	// 过滤器
-	router.Use(Filter())
 	router.Use(Recover)
 	//权限中间件
 	// load the casbin model and policy from files, database is also supported.
@@ -67,7 +62,8 @@ func SetRouter() *gin.Engine {
 		v.GET("/info", inc.GetInfo)
 		v.GET("/chapters", inc.GetChapters)
 		v.GET("/read", inc.GetRead)
-		v.GET("/file", file.StaticFile)
+		v.GET("/file", request.StaticFile)
+		v.GET("/rs", request.RS)
 	}
 	//不存在路由
 	router.NoRoute(func(c *gin.Context) {
@@ -77,44 +73,6 @@ func SetRouter() *gin.Engine {
 		})
 	})
 	return router
-}
-
-// 登录失效验证
-func Filter() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 127请求且本地开发且为dev时无需验证,方便自己测试
-		if strings.Contains(c.Request.RemoteAddr, "127.0.0.1") &&
-			str2.DevMode == cons.Dev {
-			c.Next()
-			return
-		}
-
-		if c.Request.Method == "GET" {
-			c.Next()
-			return
-		}
-		path := c.Request.URL.String()
-
-		if !strings.Contains(path, "login") && !strings.Contains(path, "/static/file") {
-			r := c.Request
-			token := r.Header.Get("token")
-			if token == "" {
-				c.Abort()
-				c.JSON(http.StatusOK, result.GetError("缺少token"))
-				return
-			}
-			ca := cache.NewCache()
-			log.Println("[token]:", token)
-			cam, err := ca.Get(token)
-			if err != nil {
-				c.Abort()
-				c.JSON(http.StatusOK, result.MapNoAuth)
-				return
-			}
-			// 延长token对应时间
-			_ = ca.Set(token, cam)
-		}
-	}
 }
 
 // 异常捕获

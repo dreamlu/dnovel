@@ -1,7 +1,7 @@
 package cons
 
 import (
-	"github.com/dreamlu/gt/tool/conf"
+	"github.com/dreamlu/gt/conf"
 )
 
 // "智能推荐", "玄幻", "仙侠修真", "科幻", "网游游戏", "历史穿越", "都市"
@@ -16,6 +16,6 @@ const (
 )
 
 var (
-	DevMode = conf.GetString("app.devMode")
-	Version = conf.GetString("app.version")
+	DevMode = conf.Get[string]("app.devMode")
+	Version = conf.Get[string]("app.version")
 )
