@@ -28,7 +28,7 @@ func NewFetcher() *colly.Collector {
 		if strings.Contains(r.URL.String(), "beqegecc") {
 			r.Headers.Set("Content-Type", "application/x-www-form-urlencoded")
 			r.Headers.Set("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36")
-			r.Headers.Set("cookie", "cf_clearance=8f7e8826a9fca60e000b254aa1c62eb66ea95e0d-1667200369-0-150; __cf_bm=5Cm7Fkpqq9.1MnLU2BazDmowXaqnhikXmo01Sdt3zvM-1667205564-0-AdSmEFZDmispSpenxu3ozQhp2WaM7fT6qNTGeiPR4/R/h14+fc/6d0sHdrnuedOcTs5ADq8P3vlOefRTbw6Nq2WyCsamhMZr0qaWIzObr0ieRp1qc1V0yFA03zvwfBb9aQ==")
+			r.Headers.Set("cookie", "cf_clearance=6f520d523c83408ee2ccbb81fab2588ac9b8352a-1667284728-0-150")
 		}
 		log.Println("Visiting", r.URL)
 	})

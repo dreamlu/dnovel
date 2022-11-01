@@ -8,7 +8,7 @@ import (
 type BookService interface {
 	GetClassify() []*datamodels.Classify                                               // 获得分类
 	GetClassifyInfo(classify string) []*datamodels.BookInfo                            // 获得分类详情书本信息
-	GetListByKeyword(keyword string) []*datamodels.BookInfo                            // 关键字搜索
+	GetSearch(keyword string) []*datamodels.BookInfo                                   // 关键字搜索
 	GetInfo(url string, source string) datamodels.BookInfo                             // 详情
 	GetChapterList(url string, source string) []datamodels.Chapter                     // 章节列表
 	GetRead(detailURL string, chapterURL string, source string) datamodels.BookContent // 章节内容
@@ -40,8 +40,8 @@ func (s *bookService) GetClassifyInfo(classify string) (itemList []*datamodels.B
 	return
 }
 
-func (s *bookService) GetListByKeyword(keyword string) (itemList []*datamodels.BookInfo) {
-	itemList = fService.GetItemList(keyword)
+func (s *bookService) GetSearch(keyword string) (itemList []*datamodels.BookInfo) {
+	itemList = fService.GetSearch(keyword)
 	return
 }
 

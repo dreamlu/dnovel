@@ -13,7 +13,7 @@ import (
 
 type FetcherService interface {
 	GetClassifyInfo(classify string) []*datamodels.BookInfo                                   // 分类书籍查找
-	GetItemList(keyword string) []*datamodels.BookInfo                                        // 关键字查找
+	GetSearch(keyword string) []*datamodels.BookInfo                                          // 关键字查找
 	GetInfo(url string, key string) datamodels.BookInfo                                       // 书籍详情
 	GetChapterList(url string, key string) []datamodels.Chapter                               // 章节列表
 	GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
@@ -37,9 +37,6 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 		source := &bookSources[i]
 
 		for _, url := range source.ClassifyUrl[classify] {
-			if strings.Contains(source.SourceKey, "beqegecc") {
-				url = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), url)
-			}
 			f := fetcher.NewFetcher()
 			q, _ := queue.New(
 				10, // Number of consumer threads
@@ -56,7 +53,7 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 }
 
 // 关键字搜索
-func (s *fetcherService) GetItemList(keyword string) (itemList []*datamodels.BookInfo) {
+func (s *fetcherService) GetSearch(keyword string) (itemList []*datamodels.BookInfo) {
 	bookSources := sourceService.GetAllSource()
 
 	for i := range bookSources {
@@ -89,9 +86,6 @@ func (s *fetcherService) GetInfo(url string, key string) (info datamodels.BookIn
 	source, ok := sourceService.GetSourceByKey(key)
 	if !ok {
 		return
-	}
-	if strings.Contains(source.SourceKey, "beqegecc") {
-		url = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), url)
 	}
 	f := fetcher.NewFetcher()
 	f.OnXML(source.DetailBookItemRule, func(e *colly.XMLElement) {
@@ -186,11 +180,17 @@ var (
 )
 
 func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly.XMLElement) (info datamodels.BookInfo) {
-	var ele = fetcher.NewXMLElement(doc)
+	var (
+		ele   = fetcher.NewXMLElement(doc)
+		cover = ele.ChildUrlText(source.DetailBookCoverRule)
+	)
+	if source.SourceKey == "beqegecc" {
+		cover = fmt.Sprintf("%s/file?url=%s", conf.Get[string]("app.requestUrl"), cover)
+	}
 	info = datamodels.BookInfo{
 		Name:         ele.ChildText(source.DetailBookNameRule),
 		Author:       ele.ChildText(source.DetailBookAuthorRule),
-		Cover:        ele.ChildUrlText(source.DetailBookCoverRule),
+		Cover:        cover,
 		Category:     ele.ChildText(source.DetailBookCategoryRule),
 		Description:  ele.ChildHtml(source.DetailBookDescriptionRule),
 		NewChapter:   ele.ChildText(source.DetailBookNewChapterRule),

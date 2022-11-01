@@ -25,7 +25,7 @@ func (c IndexController) GetClassifyInfo(u *gin.Context) {
 
 func (c IndexController) GetSearch(u *gin.Context) {
 	k := u.Request.FormValue("k")
-	results := c.Service.GetListByKeyword(k)
+	results := c.Service.GetSearch(k)
 	u.JSON(http.StatusOK, result.GetSuccess(results))
 }
 
