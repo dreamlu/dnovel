@@ -46,10 +46,9 @@ func (c IndexController) GetChapters(u *gin.Context) {
 }
 
 func (c IndexController) GetRead(u *gin.Context) {
-	detailURL := u.Request.FormValue("detail_url") // 可不传
 	chapterURL := u.Request.FormValue("chapter_url")
 	source := u.Request.FormValue("source")
-	content := c.Service.GetRead(detailURL, chapterURL, source)
+	content := c.Service.GetRead(chapterURL, source)
 
 	u.JSON(http.StatusOK, result.GetSuccess(content))
 }

@@ -7,16 +7,15 @@ import (
 	"github.com/dreamlu/gt/conf"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/queue"
-	"net/url"
 	"strings"
 )
 
 type FetcherService interface {
-	GetClassifyInfo(classify string) []*datamodels.BookInfo                                   // 分类书籍查找
-	GetSearch(keyword string) []*datamodels.BookInfo                                          // 关键字查找
-	GetInfo(url string, key string) datamodels.BookInfo                                       // 书籍详情
-	GetChapterList(url string, key string) []datamodels.Chapter                               // 章节列表
-	GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) // 获得内容
+	GetClassifyInfo(classify string) []*datamodels.BookInfo                 // 分类书籍查找
+	GetSearch(keyword string) []*datamodels.BookInfo                        // 关键字查找
+	GetInfo(url string, key string) datamodels.BookInfo                     // 书籍详情
+	GetChapterList(url string, key string) []datamodels.Chapter             // 章节列表
+	GetRead(chapterURL string, key string) (content datamodels.BookContent) // 获得内容
 }
 
 func NewFetcherService() FetcherService {
@@ -39,8 +38,8 @@ func (s *fetcherService) GetClassifyInfo(classify string) (itemList []*datamodel
 		for _, url := range source.ClassifyUrl[classify] {
 			f := fetcher.NewFetcher()
 			q, _ := queue.New(
-				10, // Number of consumer threads
-				&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
+				6, // Number of consumer threads
+				&queue.InMemoryQueueStorage{MaxSize: 1000}, // Use default queue storage
 			)
 			f.OnXML(source.ClassifyItemRule, func(e *colly.XMLElement) {
 				itemList = append(itemList, s.parseClassifyInfo(source, e))
@@ -58,10 +57,6 @@ func (s *fetcherService) GetSearch(keyword string) (itemList []*datamodels.BookI
 
 	for i := range bookSources {
 		source := &bookSources[i]
-
-		if source.SourceKey == "qxzx8" {
-			keyword = url.QueryEscape(keyword)
-		}
 		url := fmt.Sprintf(source.SearchURL, keyword)
 		if strings.Contains(source.SourceKey, "beqegecc") {
 			url = fmt.Sprintf("%s/rs?method=POST&url=%s", conf.Get[string]("app.requestUrl"), url)
@@ -72,12 +67,6 @@ func (s *fetcherService) GetSearch(keyword string) (itemList []*datamodels.BookI
 			itemList = append(itemList, s.parseItemSearch(source, e))
 		})
 		f.Visit(url)
-		//q, _ := queue.New(
-		//	3, // Number of consumer threads
-		//	&queue.InMemoryQueueStorage{MaxSize: 10000}, // Use default queue storage
-		//)
-		//q.AddURL(url)
-		//q.Run(f)
 	}
 	return
 }
@@ -116,15 +105,15 @@ func (s *fetcherService) GetChapterList(url string, key string) (chapterList []d
 	return
 }
 
-func (s *fetcherService) GetRead(detailURL string, chapterURL string, key string) (content datamodels.BookContent) {
+func (s *fetcherService) GetRead(chapterURL string, key string) (content datamodels.BookContent) {
 	source, ok := sourceService.GetSourceByKey(key)
 	if !ok {
 		return
 	}
 
-	if strings.Contains(source.SourceKey, "beqegecc") {
-		chapterURL = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), chapterURL)
-	}
+	//if strings.Contains(source.SourceKey, "beqegecc") {
+	//	chapterURL = fmt.Sprintf("%s/rs?method=GET&url=%s", conf.Get[string]("app.requestUrl"), chapterURL)
+	//}
 	f := fetcher.NewFetcher()
 	f.OnXML("//body", func(e *colly.XMLElement) {
 		content = s.parseContent(&source, e, chapterURL)
@@ -203,6 +192,9 @@ func (s *fetcherService) parseItemInfo(source *datamodels.BookSource, doc *colly
 		if strings.Contains(info.Author, v) {
 			info.Author = strings.Split(info.Author, v)[1]
 		}
+		if strings.Contains(info.Category, v) {
+			info.Category = strings.Split(info.Category, v)[1]
+		}
 	}
 	return
 }
@@ -228,14 +220,12 @@ func (s *fetcherService) parseContent(source *datamodels.BookSource, doc *colly.
 		NextURL:     ele.ChildUrl(source.ContentNextURLRule, "href"),
 		Source:      source.SourceKey,
 	}
-	// bequgee
 	switch source.SourceKey {
-	case "ibiquge":
-		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "div")
-		i := strings.Index(content.Text, "</p>")
-		if i != -1 {
-			content.Text = content.Text[i+4:]
-		}
+	case "beqegecc":
+		content.Text = ele.ChildHtml(source.ContentTextRule)
+		i := strings.Index(content.Text, "</div>")
+		k := strings.LastIndex(content.Text, "<div")
+		content.Text = content.Text[i+6 : k]
 	case "xbiquge":
 		content.Text = ele.ChildRemoveHtml(source.ContentTextRule, "p")
 	default:
